@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import router from "./app/routes/routes";
-import notFound from "./app/middleware/notFound";
-import globalError from "./app/middleware/globalError";
+import router from "./app/routes/routes.js";
+import notFound from "./app/middleware/notFound.js";
+import globalError from "./app/middleware/globalError.js";
 
 const app = express();
 

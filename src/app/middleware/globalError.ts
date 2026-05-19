@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import env from "../../config/env";
-import { errResponse } from "../../types/response";
+import env from "../../config/env.js";
+import { errResponse } from "../../types/response.js";
 import status from "http-status";
 
 const globalError = (

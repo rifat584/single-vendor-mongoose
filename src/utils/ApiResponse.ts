@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { TResponse } from "../types/response";
+import { TResponse } from "../types/response.js";
 
 const sendResponse = <T>(res: Response, data: TResponse<T>) => {
   return res.status(data.statusCode).json({

@@ -1,16 +1,19 @@
 import { Server } from "http";
-import app from "./app";
-import env from "./config/env";
+import app from "./app.js";
+import env from "./config/env.js";
+import { connectMongoDb } from "./lib/mongoose.js";
 
 let server: Server;
 
 const bootstrap = async () => {
   try {
+    await connectMongoDb();
     server = app.listen(env.port, () => {
       console.log("Server is running on port: ", env.port);
     });
   } catch (error) {
     console.log(error);
+    process.exit(1);
   }
 };
 
@@ -30,7 +33,7 @@ process.on("unhandledRejection", (err) => {
 });
 
 // Kills the process when -> synchronous error thrown but not caught
-process.on("unhandledRejection", (err) => {
+process.on("uncaughtException", (err) => {
   console.log("Unhandled synchronous Error detected", err);
   if (server) {
     server.close(() => {
