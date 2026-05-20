@@ -1,5 +1,6 @@
 // Handles ->business logic, DB logic, data processing, returning result to controller
 import bcrypt from "bcrypt";
+import fs from "node:fs";
 import crypto from "node:crypto";
 import mongoose from "mongoose";
 import {
@@ -197,9 +198,11 @@ const multer = async (file: Express.Multer.File) => {
   const uploadedImage = await cloudinary.uploader.upload(
     file.path,
     {
-      folder: "A"
+      folder: "uploads"
     }
   );
+
+  fs.unlinkSync(file.path);
 
   console.log(uploadedImage.secure_url);
 

@@ -12,7 +12,7 @@ const env = {
   database_url: process.env.DATABASE_URL as string,
   user_email: process.env.USER_EMAIL as string,
   app_password: process.env.USER_APP_PASSWORD as string,
-  salt_rounds: process.env.SALT_ROUND as string,
+  salt_rounds: process.env.SALT_ROUNDS as string,
 };
 
 export default env;
