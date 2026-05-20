@@ -3,22 +3,21 @@ import { Order, OrderItem } from "./order.model.js";
 import { Product } from "../product/product.model.js";
 import { OrderType, userIdType } from "./order.validation";
 
-
 const createNewOrder = async (payload: OrderType) => {
   const { userId, orderItems } = payload;
 
   // Find and merge products qty to avoid duplicates orders
-const itemTotals = new Map<string, number>(); //creates an empty Map Obj
+  const itemTotals = new Map<string, number>(); //creates an empty Map Obj
 
-for (const item of orderItems) { //for each order item
-  //gets items from itemTotals, first loop returns undefined as itemTotals is empty hence || 0
-  const currentQuantity = itemTotals.get(item.productId) || 0;
-  // set productId as keys and merged qty as values itemTotals
-  itemTotals.set(item.productId, currentQuantity + item.quantity);
-}
+  for (const item of orderItems) {
+    //gets items from itemTotals, first loop returns undefined as itemTotals is empty hence || 0
+    const currentQuantity = itemTotals.get(item.productId) || 0;
+    // set productId as keys and merged qty as values itemTotals
+    itemTotals.set(item.productId, currentQuantity + item.quantity);
+  }
 
-// Extract unique IDs to find products from DB
-const uniqueProductIds = Array.from(itemTotals.keys());
+  // Extract unique IDs to find products from DB
+  const uniqueProductIds = Array.from(itemTotals.keys());
 
   // Find products
   const orderedProducts = await Product.find({
@@ -29,18 +28,18 @@ const uniqueProductIds = Array.from(itemTotals.keys());
 
   // Create the lookup map (O(N) + O(M) optimization)
   const productMap = new Map(
-    orderedProducts.map((product) => [product._id.toString(), product])
+    orderedProducts.map((product) => [product._id.toString(), product]),
   );
 
   let totalPrice = 0;
 
-  // Validate stock and calculate total using the consolidated cart
+  // Validate product, stock and calculate total using the cart data
   for (const item of itemTotals.entries()) {
-    const [productId, orderedQty]= item;
+    const [productId, orderedQty] = item;
     const product = productMap.get(productId);
 
     if (!product) throw new Error(`Product not found: ${productId}`);
-    
+
     if (product.stock < orderedQty) {
       throw new Error(`Product ${productId} quantity exceeds stock`);
     }
@@ -55,7 +54,8 @@ const uniqueProductIds = Array.from(itemTotals.keys());
   try {
     session.startTransaction();
 
-    const [orderCreate] = await Order.create(
+    // create the order
+    const [orderCreate]: any[] = await Order.create(
       [
         {
           userId,
@@ -65,6 +65,7 @@ const uniqueProductIds = Array.from(itemTotals.keys());
       { session },
     );
 
+    // add orderID to each item
     const orderItemsData = Array.from(itemTotals.entries()).map(
       ([productId, quantity]) => ({
         orderId: orderCreate._id,
@@ -73,8 +74,10 @@ const uniqueProductIds = Array.from(itemTotals.keys());
       }),
     );
 
+    //add items to orderItems
     await OrderItem.insertMany(orderItemsData, { session });
 
+    // update product stock
     for (const [productId, quantity] of itemTotals.entries()) {
       await Product.updateOne(
         { _id: productId },
@@ -83,11 +86,14 @@ const uniqueProductIds = Array.from(itemTotals.keys());
       );
     }
 
+    // finds all orderItems item
     const orderItems = await OrderItem.find({ orderId: orderCreate._id })
       .session(session)
       .lean();
 
     await session.commitTransaction();
+
+    // push the result in order as Obj
     order = {
       ...orderCreate.toObject(),
       orderItems,
@@ -114,7 +120,7 @@ const myOrders = async (payload: userIdType) => {
 
 // Handle Cancel Order
 const cancelOrder = async (payload: string) => {
-  const  orderId  = payload;
+  const orderId = payload;
 
   const session = await mongoose.startSession();
 

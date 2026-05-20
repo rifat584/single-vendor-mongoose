@@ -66,10 +66,27 @@ const forgotPassword = async (req: Request, res: Response) => {
   });
 };
 
+
+// Multer
+const multer = catchAsync(async (req:Request, res:Response) => {
+  const file = req.file;
+
+  const result = await AuthService.multer(file);
+
+  res.status(200).json({
+    success: true,
+    data: result,
+  });
+});
+
+
+
+
 export const AuthController = {
   login,
   register,
   verifyEmail,
   changePassword,
   forgotPassword,
+  multer,
 };

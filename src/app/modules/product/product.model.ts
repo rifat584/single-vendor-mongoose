@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 const { model, models, Schema } = mongoose;
 
 const productSchema = new mongoose.Schema(
@@ -7,7 +6,6 @@ const productSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
-      trim: true,
     },
 
     price: {

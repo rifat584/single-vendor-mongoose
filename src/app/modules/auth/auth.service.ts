@@ -9,6 +9,8 @@ import {
 } from "./auth.validation";
 import { sendVerificationEmail } from "../../../lib/sendEmail.js";
 import { User, VerificationCode } from "./auth.model.js";
+import cloudinary from "../../../config/cloudinary";
+import env from "../../../config/env";  
 
 // Login Logic
 const login = async (payload: loginSchemaType) => {
@@ -48,7 +50,7 @@ const register = async (payload: registerSchemaType) => {
     throw err;
   }
 
-  const hashedPassword: string = await bcrypt.hash(password, 10); //pass hashing
+  const hashedPassword: string = await bcrypt.hash(password, Number(env.salt_rounds)); //pass hashing
   const verificationCode = crypto.randomInt(100000, 1000000).toString(); //generate verification code
   const expirationTime = 24 * 60 * 60 * 1000; //24 Hour
   const expiresAtDate = new Date(Date.now() + expirationTime); //+24h
@@ -189,10 +191,27 @@ const forgotPassword = async (payload: string) => {
   return payload;
 };
 
+
+// multer
+const multer = async (file: Express.Multer.File) => {
+  const uploadedImage = await cloudinary.uploader.upload(
+    file.path,
+    {
+      folder: "A"
+    }
+  );
+
+  console.log(uploadedImage.secure_url);
+
+  return uploadedImage;
+};
+
+
 export const AuthService = {
   login,
   register,
   verifyEmail,
   changePassword,
   forgotPassword,
+  multer,
 };

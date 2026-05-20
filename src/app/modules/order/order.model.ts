@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import { ORDER_STATUS } from "../../../utils/enum.js";
-
 const { model, models, Schema } = mongoose;
 
 const orderSchema = new mongoose.Schema(

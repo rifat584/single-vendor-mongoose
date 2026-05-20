@@ -3,6 +3,7 @@ import catchAsync from "../../../utils/catchAsync.js";
 import sendResponse from "../../../utils/ApiResponse.js";
 import httpStatus from "http-status";
 import { ProductService } from "./product.service.js";
+import { AuthService } from "../auth/auth.service.js";
 
 // Handle add product
 const addProduct = catchAsync(async (req: Request, res: Response) => {
@@ -73,7 +74,6 @@ const deleteProduct = catchAsync(async (req: Request, res: Response) => {
     message: "Product Successfully deleted",
   });
 });
-
 
 
 export const ProductController = {

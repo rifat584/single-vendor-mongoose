@@ -8,15 +8,12 @@ const userSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      trim: true,
     },
 
     email: {
       type: String,
       required: true,
       unique: true,
-      lowercase: true,
-      trim: true,
     },
 
     password: {
@@ -40,41 +37,41 @@ const userSchema = new mongoose.Schema(
       createdAt: true,
       updatedAt: false,
     },
-  }
+  },
 );
 
+const verificationCodeSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
-const verificationCodeSchema = new mongoose.Schema({
-  userId: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+    code: {
+      type: String,
+      required: true,
+    },
+
+    isUsed: {
+      type: Boolean,
+      default: false,
+    },
   },
-
-  code: {
-    type: String,
-    required: true,
+  {
+    timestamps: {
+      createdAt: true,
+      updatedAt: false,
+    },
   },
+);
 
-  isUsed: {
-    type: Boolean,
-    default: false,
-  },
+// Find User Static Method
+userSchema.statics.findUserByEmail = function (email) {
+  return this.findOne({ email }).lean();
+};
 
-  expiresAt: {
-    type: Date,
-    required: true,
-  },
-
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
-export const User =
-  models.User || model("User", userSchema);
+export const User = models.User || model("User", userSchema);
 
 export const VerificationCode =
-  models.VerificationCode ||
-  model("VerificationCode", verificationCodeSchema);
+  models.VerificationCode || model("VerificationCode", verificationCodeSchema);
